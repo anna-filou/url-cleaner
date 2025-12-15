@@ -1,3 +1,5 @@
+![URL Cleaner Options Page](screenshot.png)
+
 # URL Cleaner
 
 Chrome extension that automatically removes tracking parameters from URLs during navigation and when copying links. 
@@ -20,6 +22,12 @@ So it might be a bit broken. But hey, it works better than the URL cleaners I’
 3. Click "Apply changes"
 
 Syntax explained in the html.
+
+Rules sync across devices when signed into Chrome. (Probably. Have not tested it. Uses `chrome.storage.sync`.)
+
+## Default Parameters
+
+Defaults appear in the textarea together with user parameters. Edit `DEFAULT_PARAMS` in `background.js` (lines 2-13) to change them.
 
 ## Installation
 
