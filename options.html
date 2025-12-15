@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Cleaner Options</title>
+  <link rel="icon" type="image/svg+xml" href="icons8-eraser.svg">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>URL CLEANER</h1>
+    
+    <div class="main-content">
+      <div class="rules-section">
+        <h2>Rules</h2>
+        <textarea id="rulesTextarea" placeholder="Add your rules here..." spellcheck="false"></textarea>
+        <div class="buttons">
+          <button id="applyBtn">Apply changes</button>
+          <button id="revertBtn">Reset to default</button>
+        </div>
+      </div>
+
+      <div class="instructions-section">
+        <h2>How to write rules</h2>
+        <div class="instructions">
+          <p>One rule per line. By default, when a matching parameter is found, that parameter and everything after it in the URL is removed. Add <code>~</code> suffix (e.g., <code>?param~</code>) to only remove that single parameter.</p>
+          <ul>
+            <li><code>?param</code>, <code>&amp;param</code>, or <code>#param</code> - Remove parameter and everything after it from all sites</li>
+            <li><code>?param~</code>, <code>&amp;param~</code>, or <code>#param~</code> - Remove only this single parameter from all sites</li>
+            <li><code>domain.com:param</code> - Remove parameter and everything after it from specific domain</li>
+            <li><code>domain.com:param~</code> - Remove only this single parameter from specific domain</li>
+            <li><code>!domain.com</code> - Whitelist domain (never clean URLs from this domain)</li>
+            <li><code>!domain.com:param</code> - Do NOT remove this parameter from this domain</li>
+            <li><code>!param</code> - Never remove this parameter from any domain</li>
+            <li><code>&amp;param*</code> - Wildcard matching (e.g., <code>&utm_source*</code> matches <code>&utm_source_extra</code>)</li>
+          </ul>
+          <p>Lines beginning with <code>//</code> are comments, and blank lines are skipped.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
+
