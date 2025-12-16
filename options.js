@@ -41,24 +41,14 @@ applyBtn.addEventListener('click', () => {
   }, 1000);
 });
 
-// Default parameters (must match background.js)
-const DEFAULT_PARAMS = [
-  '?utm_source',
-  '?utm_medium',
-  '?utm_campaign',
-  '?utm_term',
-  '?utm_content',
-  '#fromView',
-  '?spm',
-  '?dib',
-  '&highlightedUpdateType',
-  '&origin='
-];
-
-// Reset to default
+// Reset to default - get defaults from background script
 revertBtn.addEventListener('click', () => {
-  const defaultRules = DEFAULT_PARAMS.join('\n');
-  rulesTextarea.value = defaultRules;
+  chrome.runtime.sendMessage({ action: 'getDefaultParams' }, (response) => {
+    if (response && response.defaultParams) {
+      const defaultRules = response.defaultParams.join('\n');
+      rulesTextarea.value = defaultRules;
+    }
+  });
 });
 
 // Load rules on page load

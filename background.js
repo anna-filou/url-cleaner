@@ -1,15 +1,23 @@
 // Default UTM parameters
 const DEFAULT_PARAMS = [
-  '?utm_source',
-  '?utm_medium',
-  '?utm_campaign',
-  '?utm_term',
-  '?utm_content',
-  '#fromView',
-  '?spm',
+  'utm_source',
+  'utm_source*',
+  'utm_medium',
+  'utm_campaign',
+  'utm_term',
+  'utm_content',
+  'origin',
+  'ref',
+  '?crid // Amazon',
+  'gclid // Google Ads',
+  'fbclid // Facebook',
+  'dclid // DoubleClick',
+  'msclkid // Microsoft/Bing',
+  'twclid // Twitter/X',
+  'yclid // Yandex',
+  '?spm // Alibaba/Taobao',
   '?dib',
-  '&highlightedUpdateType',
-  '&origin'
+  '&highlightedUpdateType // LinkedIn'
 ];
 
 // Rule storage structure
@@ -74,11 +82,17 @@ function parseRules(rulesText) {
   const lines = rulesText.split('\n');
   
   for (const line of lines) {
-    const trimmed = line.trim();
+    let trimmed = line.trim();
     
-    // Skip blank lines and comments
+    // Skip blank lines and comment-only lines
     if (!trimmed || trimmed.startsWith('//')) {
       continue;
+    }
+    
+    // Strip inline comments (everything after // that's not at the start)
+    const commentIndex = trimmed.indexOf(' //');
+    if (commentIndex > 0) {
+      trimmed = trimmed.substring(0, commentIndex).trim();
     }
 
     // Parse rule
@@ -121,6 +135,8 @@ function parseRules(rulesText) {
           } else if (paramTrimmed.startsWith('#')) {
             rules.globalNegations.push(paramTrimmed.substring(1));
           } else {
+            // No prefix - matches ?param, &param, and #param
+            // globalNegations is checked for both query and hash parameters
             rules.globalNegations.push(paramTrimmed);
           }
         }
@@ -158,7 +174,7 @@ function parseRules(rulesText) {
         }
       }
     } else {
-      // Global rule: ?param, &param, or #param (with optional ~ suffix for single parameter only)
+      // Global rule: ?param, &param, #param, or param (with optional ~ suffix for single parameter only)
       const isSingleOnly = trimmed.endsWith('~');
       const paramWithoutSuffix = isSingleOnly ? trimmed.slice(0, -1) : trimmed;
       
@@ -182,6 +198,15 @@ function parseRules(rulesText) {
           rules.globalHashSingle.push(paramName);
         } else {
           rules.globalHash.push(paramName);
+        }
+      } else {
+        // No prefix - matches ?param, &param, and #param
+        if (isSingleOnly) {
+          rules.globalQuerySingle.push(paramWithoutSuffix);
+          rules.globalHashSingle.push(paramWithoutSuffix);
+        } else {
+          rules.globalQuery.push(paramWithoutSuffix);
+          rules.globalHash.push(paramWithoutSuffix);
         }
       }
     }
@@ -406,6 +431,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const cleanedURL = cleanURL(request.url);
     sendResponse({ cleanedURL: cleanedURL });
     return true; // Indicates we will send a response asynchronously
+  } else if (request.action === 'getDefaultParams') {
+    sendResponse({ defaultParams: DEFAULT_PARAMS });
+    return true;
   }
 });
 

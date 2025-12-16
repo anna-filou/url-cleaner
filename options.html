@@ -24,18 +24,17 @@
       <div class="instructions-section">
         <h2>How to write rules</h2>
         <div class="instructions">
-          <p>One rule per line. By default, when a matching parameter is found, that parameter and everything after it in the URL is removed. Add <code>~</code> suffix (e.g., <code>?param~</code>) to only remove that single parameter.</p>
+          <p>One rule per line. By default, matching parameters and everything after them are removed. Add <code>~</code> to remove only that single parameter.</p>
+          <p><strong>Prefixes:</strong> Use <code>?</code>, <code>&amp;</code>, or <code>#</code> to match specific types. Omit the prefix to match all three (<code>?param</code>, <code>&amp;param</code>, <code>#param</code>).</p>
           <ul>
-            <li><code>?param</code>, <code>&amp;param</code>, or <code>#param</code> - Remove parameter and everything after it from all sites</li>
-            <li><code>?param~</code>, <code>&amp;param~</code>, or <code>#param~</code> - Remove only this single parameter from all sites</li>
-            <li><code>domain.com:param</code> - Remove parameter and everything after it from specific domain</li>
-            <li><code>domain.com:param~</code> - Remove only this single parameter from specific domain</li>
-            <li><code>!domain.com</code> - Whitelist domain (never clean URLs from this domain)</li>
-            <li><code>!domain.com:param</code> - Do NOT remove this parameter from this domain</li>
-            <li><code>!param</code> - Never remove this parameter from any domain</li>
-            <li><code>&amp;param*</code> - Wildcard matching (e.g., <code>&utm_source*</code> matches <code>&utm_source_extra</code>)</li>
+            <li><code>param</code> or <code>param~</code> - Global rule (all sites)</li>
+            <li><code>domain.com:param</code> or <code>domain.com:param~</code> - Domain-specific rule</li>
+            <li><code>!param</code> - Never remove from any domain</li>
+            <li><code>!domain.com:param</code> - Never remove from this domain</li>
+            <li><code>!domain.com</code> - Whitelist domain (never clean)</li>
+            <li><code>param*</code> - Wildcard matching (e.g., <code>utm_source*</code> matches <code>utm_source_extra</code>)</li>
           </ul>
-          <p>Lines beginning with <code>//</code> are comments, and blank lines are skipped.</p>
+          <p>Lines starting with <code>//</code> are comments.</p>
         </div>
       </div>
     </div>
