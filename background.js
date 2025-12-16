@@ -403,8 +403,12 @@ function cleanURL(url) {
   }
 }
 
-// Intercept navigation
-chrome.webNavigation.onBeforeNavigate.addListener((details) => {
+// Track URLs we've already cleaned to avoid infinite redirect loops
+const cleanedURLs = new Set();
+const CLEAN_TIMEOUT = 5000; // Clear tracking after 5 seconds
+
+// Helper function to clean and redirect if needed
+function handleURLCleaning(details, isCommitted = false) {
   // Only handle main frame navigations (not iframes/subframes)
   if (details.frameId !== 0) {
     return;
@@ -415,11 +419,52 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
     return;
   }
 
+  // Skip if we just cleaned this URL (to avoid infinite loops)
+  const urlKey = `${details.tabId}:${details.url}`;
+  if (cleanedURLs.has(urlKey)) {
+    return;
+  }
+
   const cleanedURL = cleanURL(details.url);
   
   if (cleanedURL !== details.url) {
+    // Mark both original and cleaned URLs as processed
+    cleanedURLs.add(urlKey);
+    const cleanedKey = `${details.tabId}:${cleanedURL}`;
+    cleanedURLs.add(cleanedKey);
+    
+    // Clear the tracking after timeout
+    setTimeout(() => {
+      cleanedURLs.delete(urlKey);
+      cleanedURLs.delete(cleanedKey);
+    }, CLEAN_TIMEOUT);
+    
     // URL was cleaned, redirect
+    // For onCommitted, we need to navigate to the cleaned URL
+    // This will trigger onBeforeNavigate for the cleaned URL, which is fine
     chrome.tabs.update(details.tabId, { url: cleanedURL });
+  }
+}
+
+// Intercept navigation before it starts
+chrome.webNavigation.onBeforeNavigate.addListener((details) => {
+  handleURLCleaning(details, false);
+}, {
+  url: [{ schemes: ['http', 'https'] }]
+});
+
+// Intercept navigation when it's committed (catches redirects from shortened URLs)
+// This ensures we catch the final URL after a redirect, even if onBeforeNavigate missed it
+chrome.webNavigation.onCommitted.addListener((details) => {
+  // Only process if it's a navigation (not a history state change)
+  if (details.transitionType === 'link' || 
+      details.transitionType === 'typed' || 
+      details.transitionType === 'auto_bookmark' ||
+      details.transitionType === 'auto_subframe' ||
+      details.transitionType === 'manual_subframe' ||
+      details.transitionType === 'generated' ||
+      details.transitionType === 'reload') {
+    handleURLCleaning(details, true);
   }
 }, {
   url: [{ schemes: ['http', 'https'] }]
